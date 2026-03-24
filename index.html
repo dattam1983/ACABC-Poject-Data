@@ -399,46 +399,6 @@ function loadTaluka() {
 <input name="Self_Investment" placeholder="Self Investment">
 </div>
 
-<!-- Google Form Link Display -->
-<div id="googleFormBox" 
-     style="display:none; 
-            margin-top:20px; 
-            text-align:center; 
-            padding:15px; 
-            border:2px dashed #1e3a8a; 
-            border-radius:10px; 
-            background:#f0f7ff;">
-  
-  <p style="font-size:18px; font-weight:600; color:#1e3a8a; margin-bottom:10px;">
-    Please fill the detailed project Cost.
-  </p>
-
-  <a id="googleFormLink"
-     href="#"
-     target="_blank"
-     style="
-       display:inline-block;
-       font-size:22px;
-       font-weight:800;
-       color:#ffffff;
-       background:#1e3a8a;
-       padding:14px 26px;
-       border-radius:8px;
-       text-decoration:none;
-     ">
-     👉 Fill Project Costing 
-  </a>
-</div>
-
-<div id="googleFormBox" style="display:none; margin-top:10px;">
-  <p style="font-weight:bold;color:#1e3a8a;">
-    Please fill the detailed Costing of  project:
-  </p>
-  <a id="googleFormLink" href="#" target="_blank" 
-     style="color:#2563eb;font-size:16px;">
-     Open Google Form
-  </a>
-</div>
 
 
 
@@ -454,17 +414,18 @@ function loadTaluka() {
 
 
 
-
-
-
-
-
 <script>
 document.getElementById("loanForm").addEventListener("submit", function (e) {
   e.preventDefault();
 
   const form = this;
   const data = Object.fromEntries(new FormData(form));
+
+  const selectedProject = data.Project_Type;
+  const googleFormLink = projectFormMap[selectedProject];
+
+  // ✅ Open a new blank window immediately to avoid popup blocking
+  const newWindow = window.open("", "_blank");
 
   fetch("https://script.google.com/macros/s/AKfycbwlSDtihKIx-LZa64Yzk0f_e06YNHde3vYjqxo0ibPzThdPWpdT00a2DafHPgurJaPLfQ/exec", {
     method: "POST",
@@ -473,29 +434,35 @@ document.getElementById("loanForm").addEventListener("submit", function (e) {
   .then(response => response.json())
   .then(result => {
     if (result.status === "success") {
+      // Success message
+      alert("✅ Application submitted successfully!");
 
-      // 1️⃣ Confirmation message
-      alert("✅ Your application has been submitted successfully.\nThank you!");
+      // ✅ Update new window URL to Google Form
+      if (googleFormLink) {
+        newWindow.location.href = googleFormLink;
+      } else {
+        newWindow.document.write("<p>No costing form available for this project.</p>");
+      }
 
-      // 2️⃣ Clear all fields
+      // Reset form
       form.reset();
 
-      // 3️⃣ Close the page (works if opened via link/button)
-      //setTimeout(() => {
-        //window.close();
-     // }, 500);
+      // Close current window after short delay
+      setTimeout(() => {
+        window.close();
+      }, 500);
 
     } else {
       alert("❌ Submission failed. Please try again.");
+      newWindow.close(); // Close popup if submission fails
     }
   })
   .catch(() => {
-    alert("❌ Network error. Please check internet connection.");
+    alert("❌ Network error. Please check internet.");
+    newWindow.close(); // Close popup if network error
   });
 });
-
 </script>
-
 
 <script>
 
@@ -735,7 +702,6 @@ function calculateDistance(lat1, lon1, lat2, lon2) {
 
 </body>
 </html>
-
 
 
 
